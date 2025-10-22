@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Economic and Demographic Differences Across Australian States and Territories</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/pure-min.css">
+<style>
+  body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0; background:#ffffff; color: #333; }
+  .container { max-width: 1200px; margin: auto; padding: 20px; }
+  h1, h2 { color: #222; margin-top: 20px; }
+  h1 { font-size: 2em; margin-bottom: 10px; }
+  .chart { margin: 30px 0; }
+  figure { margin: 0; }
+  figcaption { font-size: 0.9em; color: #666; margin-top: 8px; }
+  a { color: #0645ad; }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Economic and Demographic Differences Across Australian States and Territories</h1>
+    <p>As someone studying data visualisation, I wanted to see how Australia’s eight states and territories stack up against each other.  Why does Western Australia look so rich on paper?  Why do tiny regions like the ACT contribute so much?  To find out, I gathered the most recent publicly available data (up to June 2024) and built a few interactive charts.  These visuals let you explore the country’s diversity from multiple angles – geography, population size, land area and economic output.</p>
+
+    <h2>Geographic Map of Australian State Capitals</h2>
+    <p>This map combines a choropleth and point markers. States are shaded from light to dark green according to their gross state product (GSP) per capita, so darker regions are wealthier on a per‑capita basis. The circles mark the location of each capital and are sized by population. Hover over a state or city to see exact numbers.</p>
+    <div id="mapChart" class="chart"></div>
+
+    <h2>Population Share vs Economic Share</h2>
+    <p>Here I wanted to see whether states pull their weight economically.  In the grouped bar chart below, each state has two bars: one for its share of Australia’s total population and another for its share of the national economy.  When a state’s economy bar is longer than its population bar, it’s punching above its weight.</p>
+    <div id="bar" class="chart"></div>
+
+    <h2>Population and Productivity</h2>
+    <p>The final scatter plot puts population on the horizontal axis and GSP per capita on the vertical axis.  Each point’s size represents the land area of the state or territory.  Regions high up and far to the right are both populous and productive; those closer to the bottom left are smaller and less wealthy.</p>
+    <div id="scatter" class="chart"></div>
+
+    <h2>Data Sources and Methodology</h2>
+    <p>All of the figures you see in my charts come from publicly available sources.  I pulled population and area numbers from the <a href="https://en.wikipedia.org/wiki/States_and_territories_of_Australia" target="_blank">States and territories of Australia</a> article (June 2024).  To get the gross state product (GSP) per capita and how much each state contributes to the national economy, I used the <a href="https://en.wikipedia.org/wiki/List_of_Australian_states_and_territories_by_gross_state_product" target="_blank">List of Australian states and territories by gross state product</a>, which also provided population shares and growth rates.  For the geographic coordinates of each capital city I checked the individual articles on Hobart, Canberra and Darwin (and others).  I assembled all of this data on 22 October 2025.</p>
+    <p>Author: Shaun Pillai &nbsp; Date: 22 October 2025</p>
+  </div>
+  <script>
+    const statesData = [
+  {
+    "state": "New South Wales",
+    "population_2024": 8511151,
+    "area_km2": 800150,
+    "density": 10.49,
+    "gsp_per_capita": 92948,
+    "share_economy": 30.4,
+    "gsp_million": 783644,
+    "pop_share": 31.79,
+    "growth_rate": 0.95,
+    "capital": "Sydney",
+    "lat": -33.86778,
+    "lon": 151.21
+  },
+  {
+    "state": "Victoria",
+    "population_2024": 7012962,
+    "area_km2": 227416,
+    "density": 30.18,
+    "gsp_per_capita": 83209,
+    "share_economy": 22.38,
+    "gsp_million": 576555,
+    "pop_share": 26.07,
+    "growth_rate": 1.49,
+    "capital": "Melbourne",
+    "lat": -37.81417,
+    "lon": 144.96306
+  },
+  {
+    "state": "Queensland",
+    "population_2024": 5608666,
+    "area_km2": 1729742,
+    "density": 3.18,
+    "gsp_per_capita": 92350,
+    "share_economy": 20.02,
+    "gsp_million": 515895,
+    "pop_share": 20.15,
+    "growth_rate": 1.58,
+    "capital": "Brisbane",
+    "lat": -27.46778,
+    "lon": 153.02806
+  },
+  {
+    "state": "Western Australia",
+    "population_2024": 2981752,
+    "area_km2": 2527013,
+    "density": 1.15,
+    "gsp_per_capita": 151156,
+    "share_economy": 17.11,
+    "gsp_million": 441073,
+    "pop_share": 10.36,
+    "growth_rate": 1.47,
+    "capital": "Perth",
+    "lat": -31.9558,
+    "lon": 115.8597
+  },
+  {
+    "state": "South Australia",
+    "population_2024": 1882722,
+    "area_km2": 984321,
+    "density": 1.89,
+    "gsp_per_capita": 75706,
+    "share_economy": 5.25,
+    "gsp_million": 135665,
+    "pop_share": 6.89,
+    "growth_rate": 0.95,
+    "capital": "Adelaide",
+    "lat": -34.9275,
+    "lon": 138.6
+  },
+  {
+    "state": "Tasmania",
+    "population_2024": 575959,
+    "area_km2": 68401,
+    "density": 8.89,
+    "gsp_per_capita": 70594,
+    "share_economy": 1.53,
+    "gsp_million": 38160,
+    "pop_share": 2.1,
+    "growth_rate": 1.11,
+    "capital": "Hobart",
+    "lat": -42.88056,
+    "lon": 147.325
+  },
+  {
+    "state": "Australian Capital Territory",
+    "population_2024": 475644,
+    "area_km2": 2358,
+    "density": 198.97,
+    "gsp_per_capita": 112324,
+    "share_economy": 1.88,
+    "gsp_million": 49053,
+    "pop_share": 1.68,
+    "growth_rate": 1.13,
+    "capital": "Canberra",
+    "lat": -35.29306,
+    "lon": 149.12694
+  },
+  {
+    "state": "Northern Territory",
+    "population_2024": 255559,
+    "area_km2": 1347791,
+    "density": 0.19,
+    "gsp_per_capita": 135559,
+    "share_economy": 1.43,
+    "gsp_million": 34581,
+    "pop_share": 0.96,
+    "growth_rate": 0.07,
+    "capital": "Darwin",
+    "lat": -12.43806,
+    "lon": 130.84111
+  }
+];
+    const mapSpec = {
+      "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+      "width": 600,
+      "height": 450,
+      // Set a light blue background to emulate the ocean
+      "background": "#e6f4f7",
+      // Separate the color scales for different layers so legends do not merge
+      "resolve": {"scale": {"color": "independent"}},
+      
+      "projection": {
+        "type": "mercator",
+        "center": [134, -25],
+        "scale": 550
+      },
+      
+      "layer": [
+        // Base world layer for context
+        {
+          "data": {
+            "url": "https://vega.github.io/vega/data/world-110m.json",
+            "format": {"type": "topojson", "feature": "countries"}
+          },
+          "mark": {"type": "geoshape", "fill": "#f5f5f5", "stroke": "#999", "strokeWidth": 0.6}
+        },
+        // State boundaries layer coloured by GSP per capita
+        {
+          "data": {
+            "url": "https://raw.githubusercontent.com/rowanhogan/australian-states/master/states.geojson",
+            "format": {"type": "json", "property": "features"}
+          },
+          "transform": [
+            {
+              "lookup": "properties.STATE_NAME",
+              "from": {
+                "data": {"values": statesData},
+                "key": "state",
+                "fields": ["gsp_per_capita"]
+              }
+            }
+          ],
+          "mark": {"type": "geoshape", "stroke": "#ffffff", "strokeWidth": 0.4},
+          "encoding": {
+            "color": {
+              "field": "gsp_per_capita",
+              "type": "quantitative",
+              "scale": {"scheme": "greens"},
+              "legend": {"title": "GSP per capita (A$)"}
+            }
+          }
+        },
+        // Capital city markers layer
+        {
+          "data": {"values": statesData},
+          "mark": {"type": "circle", "opacity": 0.8, "stroke": "#444", "strokeWidth": 0.5},
+          "encoding": {
+            "longitude": {"field": "lon", "type": "quantitative"},
+            "latitude": {"field": "lat", "type": "quantitative"},
+            "size": {
+              "field": "population_2024",
+              "type": "quantitative",
+              "scale": {"range": [40, 800]}
+            },
+            "color": {
+              // Use a fixed grey colour for all city markers so population is only encoded by size
+              "value": "#595959"
+            },
+            "tooltip": [
+              {"field": "state", "type": "nominal", "title": "State"},
+              {"field": "capital", "type": "nominal", "title": "Capital"},
+              {"field": "population_2024", "type": "quantitative", "format": ",", "title": "Population"},
+              {"field": "gsp_per_capita", "type": "quantitative", "format": ",", "title": "GSP per capita (A$)"},
+              {"field": "share_economy", "type": "quantitative", "title": "Economy share (%)"}
+            ]
+          }
+        }
+      ]
+    };
+    const barSpec = 
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "width": 700,
+  "height": 400,
+  "data": {"values": statesData},
+  "transform": [
+    {"fold": ["pop_share", "share_economy"], "as": ["Metric", "Value"]},
+    {"calculate": "datum.Metric === 'pop_share' ? 'Population share' : 'Economy share'", "as": "MetricName"}
+  ],
+  "mark": "bar",
+  "encoding": {
+    "x": {
+      "field": "state",
+      "type": "nominal",
+      "axis": {"title": "State", "labelAngle": -45},
+      "sort": "-y"
+    },
+    "y": {
+      "field": "Value",
+      "type": "quantitative",
+      "axis": {"title": "Share of national total (%)"}
+    },
+    "color": {
+      "field": "MetricName",
+      "type": "nominal",
+      "scale": {"scheme": "set1"},
+      "title": ""
+    },
+    "xOffset": {"field": "MetricName"},
+    "tooltip": [
+      {"field": "state", "type": "nominal", "title": "State"},
+      {"field": "MetricName", "type": "nominal", "title": "Metric"},
+      {"field": "Value", "type": "quantitative", "format": ".2f", "title": "Value (%)"}
+    ]
+  }
+}
+;
+    const scatterSpec = 
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "width": 700,
+  "height": 400,
+  "data": {"values": statesData},
+  "mark": {"type": "circle", "opacity": 0.8},
+  "encoding": {
+    "x": {
+      "field": "population_2024",
+      "type": "quantitative",
+      "axis": {"title": "Population (2024)", "format": ","}
+    },
+    "y": {
+      "field": "gsp_per_capita",
+      "type": "quantitative",
+      "axis": {"title": "GSP per capita (A$)", "format": ","}
+    },
+    "size": {
+      "field": "area_km2",
+      "type": "quantitative",
+      "scale": {"range": [50, 800]},
+      "legend": {"title": "Area (km²)"}
+    },
+    "color": {
+      "field": "state",
+      "type": "nominal",
+      "legend": {"title": "State"}
+    },
+    "tooltip": [
+      {"field": "state", "type": "nominal", "title": "State"},
+      {"field": "population_2024", "type": "quantitative", "format": ",", "title": "Population"},
+      {"field": "gsp_per_capita", "type": "quantitative", "format": ",", "title": "GSP per capita (A$)"},
+      {"field": "area_km2", "type": "quantitative", "format": ",", "title": "Area (km²)"}
+    ]
+  }
+}
+;
+    vegaEmbed('#mapChart', mapSpec, {actions: false});
+    vegaEmbed('#bar', barSpec, {actions: false});
+    vegaEmbed('#scatter', scatterSpec, {actions: false});
+  </script>
+</body>
+</html>
